@@ -12,4 +12,6 @@ public class ReturnVO {
     private int code;
 
     private String msg;
+
+    private Object data;
 }
