@@ -1,5 +1,6 @@
 package com.yamada.auth;
 
+import com.yamada.exception.AuthException;
 import com.yamada.utils.JwtOperator;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,7 @@ public class AuthAspect {
         try {
             checkToken();
         } catch (Throwable throwable) {
-            throw new SecurityException("Token不合法！");
+            throw new AuthException("Token不合法！");
         }
         return point.proceed();
     }
@@ -49,11 +50,11 @@ public class AuthAspect {
             String value = annotation.value();
 
             if (!Objects.equals(role, value)) {
-                throw new SecurityException("用户无权访问！");
+                throw new AuthException("用户无权访问！");
             }
 
         } catch (Throwable throwable) {
-            throw new SecurityException("用户无权访问！", throwable);
+            throw new AuthException("用户无权访问！", throwable);
         }
         return point.proceed();
     }
@@ -67,7 +68,7 @@ public class AuthAspect {
         // 2. 校验token是否合法，是否过期，如果不合法或已过期直接抛异常，如果合法放行
         boolean isValid = jwtOperator.validateToken(token);
         if (!isValid) {
-            throw new SecurityException("Token不合法！");
+            throw new AuthException("Token不合法！");
         }
 
         // 3. 如果校验成功，那么就将用户的信息设置到request的attribute里面

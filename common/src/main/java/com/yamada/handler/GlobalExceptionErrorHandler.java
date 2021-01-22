@@ -1,5 +1,6 @@
 package com.yamada.handler;
 
+import com.yamada.exception.AuthException;
 import com.yamada.vo.ReturnVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -15,9 +16,9 @@ import java.util.List;
 @Slf4j
 public class GlobalExceptionErrorHandler {
 
-    @ExceptionHandler(SecurityException.class)
-    public ResponseEntity<ReturnVO> securityHandler(SecurityException e) {
-        log.warn("发生SecurityException异常", e);
+    @ExceptionHandler(AuthException.class)
+    public ResponseEntity<ReturnVO> securityHandler(AuthException e) {
+        log.warn("发生AuthException异常", e);
         return new ResponseEntity<>(
                 ReturnVO.builder()
                         .code(HttpStatus.UNAUTHORIZED.value())
