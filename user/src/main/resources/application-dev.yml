@@ -1,4 +1,10 @@
 spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/yamada
+    hikari:
+      username: root
+      password: 123456
+      driver-class-name: com.mysql.cj.jdbc.Driver
   cloud:
     nacos:
       discovery:
@@ -8,4 +14,4 @@ management:
     web:
       exposure:
         # 暴露所有端点
-        include: *
+        include: "*"
