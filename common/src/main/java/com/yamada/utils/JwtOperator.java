@@ -33,6 +33,7 @@ public class JwtOperator {
 
     /**
      * 从token中获取claim
+     *
      * @param token token
      * @return claim
      */
@@ -50,6 +51,7 @@ public class JwtOperator {
 
     /**
      * 获取token的过期时间
+     *
      * @param token token
      * @return 过期时间
      */
@@ -60,6 +62,7 @@ public class JwtOperator {
 
     /**
      * 判断token是否过期
+     *
      * @param token token
      * @return 已过期返回true，未过期返回false
      */
@@ -70,6 +73,7 @@ public class JwtOperator {
 
     /**
      * 计算token的过期时间
+     *
      * @return 过期时间
      */
     private Date getExpirationTime() {
@@ -78,6 +82,7 @@ public class JwtOperator {
 
     /**
      * 为指定用户生成token
+     *
      * @param claims 用户信息
      * @return token
      */
@@ -100,6 +105,7 @@ public class JwtOperator {
 
     /**
      * 判断token是否非法
+     *
      * @param token token
      * @return 未过期返回true，否则返回false
      */

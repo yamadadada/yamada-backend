@@ -41,7 +41,7 @@ public class AuthAspect {
             checkToken();
             // 2. 验证角色是否匹配
             HttpServletRequest request = getHttpServletRequest();
-            String role = (String)request.getAttribute("role");
+            String role = (String) request.getAttribute("role");
 
             MethodSignature signature = (MethodSignature) point.getSignature();
             Method method = signature.getMethod();

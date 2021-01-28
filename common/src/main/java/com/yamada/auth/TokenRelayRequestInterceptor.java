@@ -15,7 +15,7 @@ public class TokenRelayRequestInterceptor implements RequestInterceptor {
     public void apply(RequestTemplate requestTemplate) {
         // 1. 获取到Token
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        ServletRequestAttributes attributes = (ServletRequestAttributes)requestAttributes;
+        ServletRequestAttributes attributes = (ServletRequestAttributes) requestAttributes;
         HttpServletRequest request = attributes.getRequest();
         String token = request.getHeader("X-Token");
 

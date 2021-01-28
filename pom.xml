@@ -12,6 +12,7 @@
         <module>author</module>
         <module>common</module>
         <module>user</module>
+        <module>gateway</module>
     </modules>
 
     <parent>

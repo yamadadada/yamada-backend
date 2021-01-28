@@ -88,6 +88,7 @@ public class UserServiceImpl implements UserService {
 
     /**
      * 根据用户信息，调用工具类生成token
+     *
      * @param user
      * @return
      */
