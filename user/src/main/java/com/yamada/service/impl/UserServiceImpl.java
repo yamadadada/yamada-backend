@@ -1,6 +1,8 @@
 package com.yamada.service.impl;
 
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.DigestUtil;
+import cn.hutool.extra.mail.MailUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.yamada.entity.User;
 import com.yamada.exception.AuthException;
@@ -84,6 +86,15 @@ public class UserServiceImpl implements UserService {
             log.error("【注册】插入数据失败, {}", user.toString());
             throw new MyException("用户注册失败，请稍后再试");
         }
+    }
+
+    @Override
+    public void sendActivationEmail(String email) {
+        // 生成随机验证码
+        String code = RandomUtil.randomNumbers(6);
+        // 放入redis缓存
+
+        MailUtil.send(email, "注册账号-验证码", "宁的契约验证码：" + code + "，记得在1小时内完成注册哦~", false);
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.yamada.controller;
 
+import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.ReUtil;
 import com.yamada.form.LoginForm;
 import com.yamada.service.UserService;
@@ -21,8 +22,7 @@ public class AuthorizationController {
     @PostMapping("/login")
     public ResponseEntity<ReturnVO> login(@RequestBody @Validated LoginForm loginForm) {
         // 1.判断name是否为邮箱
-        String EMAIL_REGEX = "^(([^<>()[\\]\\\\.,;:\\s@\"]+(\\.[^<>()[\\]\\\\.,;:\\s@\"]+)*)|(\".+\"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
-        boolean isEmail = ReUtil.isMatch(EMAIL_REGEX, loginForm.getName());
+        boolean isEmail = Validator.isEmail(loginForm.getName());
         String token;
         if (isEmail) {
             token = userService.loginByEmail(loginForm.getName(), loginForm.getPassword());

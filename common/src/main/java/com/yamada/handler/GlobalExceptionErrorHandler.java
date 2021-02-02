@@ -1,6 +1,7 @@
 package com.yamada.handler;
 
 import com.yamada.exception.AuthException;
+import com.yamada.exception.MyException;
 import com.yamada.vo.ReturnVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,17 @@ public class GlobalExceptionErrorHandler {
                 ReturnVO.builder()
                         .code(HttpStatus.BAD_REQUEST.value())
                         .msg(sb.toString())
+                        .build(),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(MyException.class)
+    public ResponseEntity<ReturnVO> myExceptionHandler(MyException e) {
+        return new ResponseEntity<>(
+                ReturnVO.builder()
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .msg(e.getMessage())
                         .build(),
                 HttpStatus.BAD_REQUEST
         );

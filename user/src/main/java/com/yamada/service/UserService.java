@@ -9,4 +9,6 @@ public interface UserService {
     String loginByEmail(String email, String password);
 
     void signin(SigninForm signinForm);
+
+    void sendActivationEmail(String email);
 }
