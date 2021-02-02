@@ -9,6 +9,11 @@ spring:
     nacos:
       discovery:
         server-addr: ${NACOS_ADDR:111.230.220.64:8848}
+  redis:
+    database: 0
+    host: localhost
+    port: 6379
+    password: 111
 management:
   endpoints:
     web:
