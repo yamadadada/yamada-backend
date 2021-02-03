@@ -4,6 +4,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.extra.mail.MailUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.yamada.common.constant.RedisConstant;
 import com.yamada.user.entity.User;
 import com.yamada.common.exception.AuthException;
 import com.yamada.common.exception.MyException;
@@ -94,17 +95,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void sendActivationEmail(String email) {
-        // 生成随机验证码
+        // 1.检查是否重复发送
+        if (stringRedisTemplate.opsForValue().get(RedisConstant.ACTIVATION_CODE_INTERVAL_PREFIX + email) != null) {
+            throw new MyException("验证码不要重复发送");
+        }
+        // 2.生成随机验证码
         String code = RandomUtil.randomNumbers(6);
-        // 放入redis缓存
-        stringRedisTemplate.opsForValue().set(email, code, 1, TimeUnit.HOURS);
-        // 发送邮件
+        // 3.放入redis缓存
+        // 验证码有效期为1小时
+        stringRedisTemplate.opsForValue().set(RedisConstant.ACTIVATION_CODE_PREFIX + email, code, 1, TimeUnit.HOURS);
+        // 验证码发送间隔为60秒
+        stringRedisTemplate.opsForValue().set(RedisConstant.ACTIVATION_CODE_INTERVAL_PREFIX + email, code, 60, TimeUnit.SECONDS);
+        // 4.发送邮件
         MailUtil.send(email, "注册账号-验证码", "宁的契约验证码：" + code + "，记得在1小时内完成注册哦~", false);
     }
 
     /**
      * 根据用户信息，调用工具类生成token
-     *
      * @param user
      * @return
      */
