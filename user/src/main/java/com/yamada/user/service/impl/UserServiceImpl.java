@@ -67,19 +67,30 @@ public class UserServiceImpl implements UserService {
     @Override
     public void signin(SigninForm signinForm) {
         // 1.校验验证码是否正确
-        // TODO
+        String code = stringRedisTemplate.opsForValue().get(RedisConstant.ACTIVATION_CODE_PREFIX + signinForm.getMail());
+        if (code == null) {
+            throw new MyException("验证码已过期，请重新发送");
+        }
+        if (!code.equals(signinForm.getActivationCode())) {
+            throw new MyException("验证码不正确~");
+        }
+        stringRedisTemplate.delete(RedisConstant.ACTIVATION_CODE_PREFIX + signinForm.getMail());
+
         // 2.判断邮箱是否重复
         User user = userMapper.selectOne(new QueryWrapper<User>().select("email").eq("email", signinForm.getMail()));
         if (user != null) {
             throw new AuthException("这个邮箱已经注册了~");
         }
+
         // 3.判断用户名是否重复
         user = userMapper.selectOne(new QueryWrapper<User>().select("name").eq("name", signinForm.getName()));
         if (user != null) {
             throw new AuthException("这个用户名已经被抢走了，换一个试试吧~");
         }
+
         // 4.密码加密
         String bcrypt = DigestUtil.bcrypt(signinForm.getPassword());
+
         // 5.构造user
         user = User.builder()
                 .name(signinForm.getName())
@@ -99,13 +110,16 @@ public class UserServiceImpl implements UserService {
         if (stringRedisTemplate.opsForValue().get(RedisConstant.ACTIVATION_CODE_INTERVAL_PREFIX + email) != null) {
             throw new MyException("验证码不要重复发送");
         }
+
         // 2.生成随机验证码
         String code = RandomUtil.randomNumbers(6);
+
         // 3.放入redis缓存
         // 验证码有效期为1小时
         stringRedisTemplate.opsForValue().set(RedisConstant.ACTIVATION_CODE_PREFIX + email, code, 1, TimeUnit.HOURS);
         // 验证码发送间隔为60秒
         stringRedisTemplate.opsForValue().set(RedisConstant.ACTIVATION_CODE_INTERVAL_PREFIX + email, code, 60, TimeUnit.SECONDS);
+
         // 4.发送邮件
         MailUtil.send(email, "注册账号-验证码", "宁的契约验证码：" + code + "，记得在1小时内完成注册哦~", false);
     }

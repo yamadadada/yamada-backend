@@ -32,4 +32,20 @@ public class UserController {
         userService.sendActivationEmail(mail);
         return ReturnUtil.success(null);
     }
+
+    @PutMapping("/password")
+    public ResponseEntity<ReturnVO> updatePassword(@RequestParam("activationCode") String activationCode,
+                                                   @RequestParam("mail") String mail,
+                                                   @RequestParam("password") String password) {
+        if (Validator.isNumber(activationCode)) {
+            throw new MyException("验证码不正确");
+        }
+        if (!Validator.isEmail(mail)) {
+            throw new MyException("邮箱格式不正确");
+        }
+        if (password.length() < 6 || password.length() > 20) {
+            throw new MyException("密码长度必须是6-20");
+        }
+        return ReturnUtil.success(null);
+    }
 }
