@@ -11,4 +11,6 @@ public interface UserService {
     void signin(SigninForm signinForm);
 
     void sendActivationEmail(String email);
+
+    void updatePassword(String activationCode, String email, String password);
 }

@@ -4,6 +4,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.extra.mail.MailUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.yamada.common.constant.RedisConstant;
 import com.yamada.user.entity.User;
 import com.yamada.common.exception.AuthException;
@@ -121,7 +122,31 @@ public class UserServiceImpl implements UserService {
         stringRedisTemplate.opsForValue().set(RedisConstant.ACTIVATION_CODE_INTERVAL_PREFIX + email, code, 60, TimeUnit.SECONDS);
 
         // 4.发送邮件
-        MailUtil.send(email, "注册账号-验证码", "宁的契约验证码：" + code + "，记得在1小时内完成注册哦~", false);
+        MailUtil.send(email, "验证码", "宁的契约验证码：" + code + "，记得在1小时内完成注册哦~", false);
+    }
+
+    @Override
+    public void updatePassword(String activationCode, String email, String password) {
+        // 1.校验验证码是否正确
+        String code = stringRedisTemplate.opsForValue().get(RedisConstant.ACTIVATION_CODE_PREFIX + email);
+        if (code == null) {
+            throw new MyException("验证码已过期，请重新发送");
+        }
+        if (!code.equals(activationCode)) {
+            throw new MyException("验证码不正确~");
+        }
+        stringRedisTemplate.delete(RedisConstant.ACTIVATION_CODE_PREFIX + email);
+
+        // 2.密码加密
+        String bcrypt = DigestUtil.bcrypt(password);
+
+        // 3.更新密码
+        UpdateWrapper<User> wrapper = new UpdateWrapper<>();
+        wrapper.eq("email", email).set("password", bcrypt);
+        int result = userMapper.update(null, wrapper);
+        if (result == 0) {
+            throw new MyException("该邮箱还没注册帐号哦");
+        }
     }
 
     /**
