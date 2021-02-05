@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -128,25 +129,42 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updatePassword(String activationCode, String email, String password) {
         // 1.校验验证码是否正确
-        String code = stringRedisTemplate.opsForValue().get(RedisConstant.ACTIVATION_CODE_PREFIX + email);
-        if (code == null) {
-            throw new MyException("验证码已过期，请重新发送");
-        }
-        if (!code.equals(activationCode)) {
-            throw new MyException("验证码不正确~");
-        }
-        stringRedisTemplate.delete(RedisConstant.ACTIVATION_CODE_PREFIX + email);
+        this.validateActivationCode(email, activationCode);
 
         // 2.密码加密
         String bcrypt = DigestUtil.bcrypt(password);
 
         // 3.更新密码
         UpdateWrapper<User> wrapper = new UpdateWrapper<>();
-        wrapper.eq("email", email).set("password", bcrypt);
+        wrapper.eq("email", email).set("password", bcrypt).set("update_time", new Date());
         int result = userMapper.update(null, wrapper);
         if (result == 0) {
             throw new MyException("该邮箱还没注册帐号哦");
         }
+    }
+
+    @Override
+    public void updateNickName(Integer userId, String nickName) {
+        UpdateWrapper<User> wrapper = new UpdateWrapper<>();
+        wrapper.eq("id", userId).set("nick_name", nickName);
+        userMapper.update(null, wrapper);
+    }
+
+    @Override
+    public void updateEmail(Integer userId, String email, String activationCode) {
+        // 1.校验验证码是否正确
+        this.validateActivationCode(email, activationCode);
+
+        // 2.判断邮箱是否重复
+        User user = userMapper.selectOne(new QueryWrapper<User>().select("email").eq("email", email));
+        if (user != null) {
+            throw new MyException("这个邮箱已经注册了~");
+        }
+
+        // 3.更新邮箱
+        UpdateWrapper<User> wrapper = new UpdateWrapper<>();
+        wrapper.eq("id", userId).set("email", email);
+        userMapper.update(null, wrapper);
     }
 
     /**
@@ -159,5 +177,21 @@ public class UserServiceImpl implements UserService {
         claims.put("id", user.getId());
         claims.put("name", user.getName());
         return jwtOperator.generateToken(claims);
+    }
+
+    /**
+     * 校验验证码是否正确
+     * @param email
+     * @param activationCode
+     */
+    private void validateActivationCode(String email, String activationCode) {
+        String code = stringRedisTemplate.opsForValue().get(RedisConstant.ACTIVATION_CODE_PREFIX + email);
+        if (code == null) {
+            throw new MyException("验证码已过期，请重新发送");
+        }
+        if (!code.equals(activationCode)) {
+            throw new MyException("验证码不正确~");
+        }
+        stringRedisTemplate.delete(RedisConstant.ACTIVATION_CODE_PREFIX + email);
     }
 }

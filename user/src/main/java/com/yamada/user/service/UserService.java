@@ -13,4 +13,8 @@ public interface UserService {
     void sendActivationEmail(String email);
 
     void updatePassword(String activationCode, String email, String password);
+
+    void updateNickName(Integer userId, String nickName);
+
+    void updateEmail(Integer userId, String email, String activationCode);
 }
